@@ -1,0 +1,9 @@
+|-- .env
+|-- .gitignore
+|-- database
+    |-- db.js
+|-- models
+    |-- todo.model.js
+|-- package-lock.json
+|-- package.json
+|-- server.js

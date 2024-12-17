@@ -21,60 +21,82 @@ connectToDb()
 //  Todo Api
 
 //  =====> fetch all task 
-app.get('/task', async (req,res)=>{
+app.get('/tasks', async (req,res)=>{
+    
     try{
         const result = await Todo.find()
-        res.send({
-            success:true,
-            message:'Todo List Retrived Successfully',
-            data:result
-        })
+      
+        if (result.length===0) {
+            res.send({
+                success:false,
+                message:'No Task Found',
+                data:result
+            })
+        } else {
+            res.send({
+                success:true,
+                message:'Todo List Retrived Successfully',
+                data:result
+            })
+        }
     }catch(error){
-        res.send({
+        res.status(500).send({
             success:false,
             message:'Todo List is Not Retrived ',
-            data:result
+            data:error.message,
         })
     }; 
 });
 
 //  =====> create task
-app.post('/create-todo', async (req,res)=>{
-    const todoDetails = req.body;
+app.post('/tasks', async (req,res)=>{
+    const {title,description,status} = req.body;
+
+    console.log(req.body);
+    
+
     try {
-        const result = await Todo.create(todoDetails)
+        const result = await Todo.create({title,description,status})
         res.send({
             success:true,
             message:'Task is created successfully',
             data:result,
         })
     } catch (error) {
-        res.send({
+        res.status(500).send({
             success:false,
             message:'Task is Not created ',
-            data:result,
+            data:error.message,
         })
 }});
  
 
 //  =====> find single task
-app.get('/:todoId',async (req,res)=>{
-    const todoId =req.params.todoId;
+app.get('/tasks/:id',async (req,res)=>{
+    const id =req.params.id;
    
 
     try {
-        const result = await Todo.findById(todoId)
+        const result = await Todo.findById(id)
+       if (!result) {
+        res.send({
+            success:"fetched",
+            message:'Task is not present',
+            data:result,
+        })
+       }else{
         res.send({
             success:true,
             message:'Task is fetched',
             data:result,
         })
+       }
 
     } catch (error) {
-        res.send({
+        res.status(500).send({
             success:false,
             message:'failed to retived todo',
-            data:result,
+            data:error.message,
         })
     }
 
@@ -82,24 +104,33 @@ app.get('/:todoId',async (req,res)=>{
 
 
 // update task
-app.patch('/:todoId', async (req,res)=>{
-    const todoId = req.params.todoId;
+app.put('/tasks/:id', async (req,res)=>{
+    const id = req.params.id;
     const updatedTodo= req.body;
     try {
-        const result =  await Todo.findByIdAndUpdate(todoId,updatedTodo,{
-            new:true
+        const result =  await Todo.findByIdAndUpdate(id,updatedTodo,{
+            new:true,
+            runValidators:true,
         });
-        res.send({
-            success:true,
-            message:'Task is updated',
-            data:result,
-        })
+        if (!result) {
+            res.send({
+                success:false,
+                message:'Task was not found',
+                data:result,
+            })
+        } else {
+            res.send({
+                success:true,
+                message:'Task is updated',
+                data:result,
+            })
+        }
 
     } catch (error) {
-        res.send({
+        res.status(500).send({
             success:true,
             message:'Task is not updated',
-            data:result,
+            data:error.message,
         })
 
     }
@@ -107,24 +138,33 @@ app.patch('/:todoId', async (req,res)=>{
 
 
 //delete
-app.delete("/delete/:todo",async (req,res)=>{
+app.delete("/tasks/:id",async (req,res)=>{
     try {
-        const result = await Todo.findByIdAndDelete(req.params.todo)
-        res.send({
-            success:true,
-            message:'Task is deleted',
-            data:result,
-        })
+        const result = await Todo.findByIdAndDelete(req.params.id)
+
+        if (!result) {
+            res.send({
+                success:false,
+                message:'Task does not exist',
+                data:result,
+            })     
+        } else {
+            res.send({
+                success:true,
+                message:'Task is deleted',
+                data:result,
+            })
+        }
     } catch (error) {
-        res.send({
+        res.status(500).send({
             success:false,
             message:'Task cannot be deleted',
-            data:result,
+            data:error.message,
         })
     }
-
-
 })
+
+
 
 
 

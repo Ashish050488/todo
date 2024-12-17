@@ -1,17 +1,19 @@
 import mongoose, { model, Schema } from "mongoose";
 
 const todoSchema = new Schema ({
-    text:{
+    title:{
         type:String,
         required:true
     },
-    priority:{
+    description:{
         type:String,
         required:true
     },
-    deadline:{
+    status:{
         type:String,
-        required:true
+        default:"pending",
+        enum:["pending","in-progress","completed"],
+        trim:true
     }
 });
 
